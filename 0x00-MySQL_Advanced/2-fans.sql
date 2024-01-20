@@ -1,6 +1,6 @@
--- Title: Number of fans per origin
--- Description: List the number of fans per origin.
-SELECT origin, SUM(nb_fans) AS nb_fans
+-- SQL script that ranks country origins of bands
+-- ordered by the number:
+SELECT origin, SUM(fans) as nb_fans
 FROM metal_bands
 GROUP BY origin
 ORDER BY nb_fans DESC;
