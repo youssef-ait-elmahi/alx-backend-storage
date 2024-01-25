@@ -35,7 +35,6 @@ def call_history(method: Callable) -> Callable:
         return result
     return wrapper
 
-
     def replay(method: Callable):
         """
         Display the history of calls of a particular function
@@ -44,7 +43,8 @@ def call_history(method: Callable) -> Callable:
         outputs = method.__qualname__ + ":outputs"
         count = method.__self__._redis.llen(inputs)
         print(f"{method.__qualname__} was called {count} times:")
-        for inp, out in zip(method.__self__._redis.lrange(inputs, 0, -1), method.__self__._redis.lrange(outputs, 0, -1)):
+        for inp, out in zip(method.__self__._redis.lrange(inputs, 0, -1),
+                            method.__self__._redis.lrange(outputs, 0, -1)):
             print(f"{method.__qualname__}{inp.decode('utf-8')} -> {out.decode('utf-8')}")
 
 
