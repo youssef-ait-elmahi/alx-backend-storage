@@ -81,8 +81,6 @@ def replay(method: Callable):
     Display the history of calls of a particular function
     """
     method_name = method.__qualname__
-    input_args = inp.decode('utf-8')
-    output = out.decode('utf-8')
 
     inputs = method.__qualname__ + ":inputs"
     outputs = method.__qualname__ + ":outputs"
@@ -90,4 +88,5 @@ def replay(method: Callable):
     print(f"{method.__qualname__} was called {count} times:")
     for inp, out in zip(method.__self__._redis.lrange(inputs, 0, -1),
                         method.__self__._redis.lrange(outputs, 0, -1)):
-        print(f"{method_name}(*{input_args}) -> {output}")
+        print(
+            f"{method_name}(*{input_data.decode('utf-8')}) -> {output_data.decode('utf-8')}")
