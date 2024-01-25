@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""
-Implementing an expiring web cache and tracker.
-"""
+"""Implementing an expiring web cache"""
 
 import requests
 import redis
@@ -12,7 +10,7 @@ cache_store = redis.Redis()
 
 
 def track_url_access(method):
-    """count the times a url is aaceed"""
+    """count the times a url is aaceed and store html content in cache"""
 
     @wraps(method)
     def decorated_function(url):
@@ -36,6 +34,6 @@ def track_url_access(method):
 
 @track_url_access
 def get_page(url: str) -> str:
-    """Returns HTML content of a URL"""
+    """get html content of a web page"""
     response = requests.get(url)
     return response.text
