@@ -1,44 +1,41 @@
 #!/usr/bin/env python3
+
 """
-This module provides a function to get the HTML content of a URL and cache it.
+Implementing an expiring web cache and tracker.
 """
 
 import requests
-from redis import Redis
+import redis
 from functools import wraps
-from typing import Callable
 
-# create a Redis client
-redis = Redis()
+cache_store = redis.Redis()
 
-def cache_page(func: Callable) -> Callable:
-    """
-    Decorator to cache the HTML content of a URL with an expiration time of 10 seconds.
-    """
-    @wraps(func)
-    def wrapper(url: str) -> str:
-        # get the cache key for the url
-        key = f"cached:{url}"
-        # get the count key for the url
+
+def track_url_access(method):
+    """count the times a url is aaceed"""
+
+    @wraps(method)
+    def decorated_function(url):
+        cached_key = f"cached:{url}"
+        cached_data = cache_store.get(cached_key)
+
+        if cached_data:
+            return cached_data.decode("utf-8")
+
         count_key = f"count:{url}"
-        # increment the count by 1
-        redis.incr(count_key)
-        # get the cached response from the cache
-        cached_response = redis.get(key)
-        # if the cache is empty, call the original function
-        if not cached_response:
-            response = func(url)
-            # cache the response with a 10-second expiry
-            redis.set(key, response, ex=10)
-            return response
-        # otherwise, return the cached response
-        return cached_response.decode('utf-8')
-    # return the wrapper function
-    return wrapper
+        html = method(url)
 
-@cache_page
+        cache_store.incr(count_key)
+        cache_store.set(cached_key, html)
+        cache_store.expire(cached_key, 10)
+
+        return html
+
+    return decorated_function
+
+
+@track_url_access
 def get_page(url: str) -> str:
-    """
-    Get the HTML content of a URL.
-    """
-    return requests.get(url).text
+    """Returns HTML content of a URL"""
+    response = requests.get(url)
+    return response.text
